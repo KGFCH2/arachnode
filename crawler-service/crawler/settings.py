@@ -1,6 +1,6 @@
 import os
 
-BOT_NAME = "jobhunter"
+BOT_NAME = "Arachnode"
 SPIDER_MODULES = ["crawler.spiders"]
 NEWSPIDER_MODULE = "crawler.spiders"
 
