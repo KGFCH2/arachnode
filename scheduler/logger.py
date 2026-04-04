@@ -47,7 +47,27 @@ class _JSONFormatter(logging.Formatter):
         return json.dumps(payload, default=str)
 
 
-def get_logger(name: str) -> logging.Logger:
+class StructLogger(logging.LoggerAdapter):
+    """Adapter to move arbitrary kwargs into the `extra` dict, so they become LogRecord attributes."""
+    def process(self, msg, kwargs):
+        extra = kwargs.get("extra", {})
+        new_kwargs = {}
+        # Keys natively supported by Logger._log()
+        native_kwargs = {"exc_info", "stack_info", "stacklevel"}
+        for k, v in kwargs.items():
+            if k in native_kwargs:
+                new_kwargs[k] = v
+            elif k != "extra":
+                # Convert dict to a new dict if it was empty initially, or just mutate
+                if not isinstance(extra, dict):
+                    extra = dict(extra)
+                extra[k] = v
+        if extra:
+            new_kwargs["extra"] = extra
+        return msg, new_kwargs
+
+
+def get_logger(name: str) -> StructLogger:
     logger = logging.getLogger(name)
     if not logger.handlers:
         handler = logging.StreamHandler(sys.stdout)
@@ -55,4 +75,4 @@ def get_logger(name: str) -> logging.Logger:
         logger.addHandler(handler)
         logger.propagate = False
     logger.setLevel(logging.DEBUG)
-    return logger
+    return StructLogger(logger, {})
