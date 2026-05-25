@@ -189,6 +189,11 @@ async def proxy_generate(request: Request):
     return await proxy.proxy_request(request, f"{proxy.EMAIL_GEN_URL}/generate")
 
 
+@app.api_route("/api/digest", methods=["POST"], tags=["proxy"])
+async def proxy_digest(request: Request):
+    return await proxy.proxy_request(request, f"{proxy.EMAIL_GEN_URL}/digest")
+
+
 # ---------------------------------------------------------------------------
 # Composite endpoint — POST /api/workflow/apply
 # ---------------------------------------------------------------------------
@@ -249,10 +254,9 @@ async def workflow_apply(body: WorkflowRequest):
         logger.warning("Email generation failed: %s", exc)
         email = None
 
-    return {
-        "job":      job,
-        "contacts": contacts,
+   return {
+        "job":         job,
+        "contacts":    contacts,
         "draft_email": email,
     }
-
 
